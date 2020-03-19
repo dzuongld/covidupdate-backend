@@ -65,8 +65,8 @@ app.get('/data', (req, res, next) => {
 
 app.use(express.static(path.join('public')))
 
-app.use((req, res, next) => {
-    res.sendFile(path.resolve(__dirname, 'public', 'index.html'))
+app.get('*', (request, response) => {
+    response.sendFile(path.join(__dirname, 'public', 'index.html'))
 })
 
 app.listen(port)
