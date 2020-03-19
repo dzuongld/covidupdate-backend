@@ -1,0 +1,20 @@
+{
+    "name": "covidmap-api",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "nodemon index.js"
+    },
+    "author": "Duong Lam",
+    "license": "ISC",
+    "dependencies": {
+        "csv": "^5.3.2",
+        "express": "^4.17.1",
+        "moment": "^2.24.0"
+    },
+    "devDependencies": {
+        "nodemon": "^2.0.2"
+    }
+}
