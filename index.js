@@ -24,7 +24,7 @@ app.get('/data', (req, res, next) => {
     })
 })
 
-app.get('/news', (req, res, next) => {
+app.get('/newsfeed', (req, res, next) => {
     getNews().then((data) => {
         res.send(data)
     })
