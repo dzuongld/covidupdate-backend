@@ -1,6 +1,7 @@
 const https = require('https')
 const parse = require('csv-parse/lib/sync')
 const moment = require('moment')
+const fields = require('./fields')
 
 const url =
     'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/'
@@ -68,4 +69,42 @@ const getData = (date) => {
     })
 }
 
-module.exports = { getData, getDate }
+const processData = async () => {
+    const dateRecent = await getDate()
+    const dateBeforeRecent = await getDate(dateRecent)
+
+    const dataRecent = await getData(dateRecent)
+    const dataBeforeRecent = await getData(dateBeforeRecent)
+
+    if (!dateRecent || !dateBeforeRecent || !dataRecent || !dataBeforeRecent) {
+        return null
+    }
+
+    const data = {}
+    for (const record of dataRecent) {
+        // exclude irrelevant records
+        if (record[fields.CONFIRMED] == 0) continue
+
+        const key = record[fields.COUNTRY] + record[fields.STATE]
+        data[key] = { ...record, NewCases: record[fields.CONFIRMED] }
+    }
+
+    for (const record of dataBeforeRecent) {
+        const key = record[fields.COUNTRY] + record[fields.STATE]
+        // increase in confirmed cases is new cases
+        if (data[key]) {
+            let newCases =
+                parseInt(data[key][fields.CONFIRMED]) -
+                parseInt(record[fields.CONFIRMED])
+            if (newCases < 0) newCases = 0 // rare cases - prevent faulty data
+            data[key] = {
+                ...data[key],
+                NewCases: newCases.toString()
+            }
+        }
+    }
+
+    return { covidData: data, date: dateRecent }
+}
+
+module.exports = { processData }
