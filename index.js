@@ -1,5 +1,6 @@
 const express = require('express')
 const path = require('path')
+const cors = require('cors')
 
 const { processData } = require('./utils/program')
 const { getNews } = require('./utils/rssfeed')
@@ -17,6 +18,7 @@ const port = process.env.PORT || 5000
 //     res.setHeader('Access-Control-Allow-Methods', 'GET')
 //     next()
 // })
+app.use(cors())
 
 app.get('/data', (req, res, next) => {
     processData().then((data) => {
