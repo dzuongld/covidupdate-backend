@@ -5,7 +5,7 @@ const getNews = () => {
     return new Promise((resolve) => {
         https
             .get('https://www.health.gov.au/news/rss.xml', (res) => {
-                console.log('statusCode:', res.statusCode)
+                // console.log('statusCode:', res.statusCode)
 
                 if (res.statusCode !== 200) resolve(null)
 
@@ -17,10 +17,10 @@ const getNews = () => {
 
                 res.on('end', () => {
                     try {
-                        console.log(rawData)
+                        // console.log(rawData)
 
                         parseString(rawData, function(err, result) {
-                            console.log(result.rss.channel[0].item[0])
+                            // console.log(result.rss.channel[0].item[0])
                             resolve(result.rss.channel[0].item)
                         })
                     } catch (e) {
