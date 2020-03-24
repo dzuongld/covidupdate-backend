@@ -71,7 +71,7 @@ const getData = (date) => {
 }
 
 const processData = async () => {
-    const dateRecent = await getDate('03-24-2020')
+    const dateRecent = await getDate()
     const dateBeforeRecent = await getDate(dateRecent)
 
     const dataRecent = await getData(dateRecent)
@@ -87,7 +87,11 @@ const processData = async () => {
         if (record[fields.CONFIRMED] == 0) continue
 
         const country = record[fields.COUNTRY] || record[fields2.COUNTRY]
-        const state = record[fields.STATE] || record[fields2.STATE] || ''
+        let state = record[fields.STATE] || record[fields2.STATE] || ''
+
+        if (country === 'United Kingdom' && state === '')
+            state = 'United Kingdom'
+
         const key = country + state
 
         if (data[key]) {
@@ -106,7 +110,7 @@ const processData = async () => {
 
     for (const record of dataBeforeRecent) {
         const country = record[fields.COUNTRY] || record[fields2.COUNTRY]
-        const state = record[fields.STATE] || record[fields2.STATE] || ''
+        let state = record[fields.STATE] || record[fields2.STATE] || ''
         const key = country + state
         // increase in confirmed cases is new cases
         if (data[key]) {
