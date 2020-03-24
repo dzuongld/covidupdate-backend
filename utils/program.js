@@ -92,6 +92,8 @@ const processData = async () => {
         if (country === 'United Kingdom' && state === '')
             state = 'United Kingdom'
 
+        if (country === 'Netherlands' && state === '') state = 'Netherlands'
+
         const key = country + state
 
         if (data[key]) {
