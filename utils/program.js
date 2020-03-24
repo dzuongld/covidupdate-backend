@@ -2,6 +2,7 @@ const https = require('https')
 const parse = require('csv-parse/lib/sync')
 const moment = require('moment')
 const fields = require('./fields')
+const fields2 = require('./fields-alt')
 
 const url =
     'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/'
@@ -70,7 +71,7 @@ const getData = (date) => {
 }
 
 const processData = async () => {
-    const dateRecent = await getDate()
+    const dateRecent = await getDate('03-24-2020')
     const dateBeforeRecent = await getDate(dateRecent)
 
     const dataRecent = await getData(dateRecent)
@@ -85,12 +86,28 @@ const processData = async () => {
         // exclude irrelevant records
         if (record[fields.CONFIRMED] == 0) continue
 
-        const key = record[fields.COUNTRY] + record[fields.STATE]
-        data[key] = { ...record, NewCases: record[fields.CONFIRMED] }
+        const country = record[fields.COUNTRY] || record[fields2.COUNTRY]
+        const state = record[fields.STATE] || record[fields2.STATE] || ''
+        const key = country + state
+
+        if (data[key]) {
+            data[key][fields.CONFIRMED] += parseInt(record[fields.CONFIRMED])
+            data[key][fields.DEATHS] += parseInt(record[fields.DEATHS])
+            data[key][fields.RECOVERED] += parseInt(record[fields.RECOVERED])
+            data[key][fields.NEW_CASES] += data[key][fields.CONFIRMED]
+        } else {
+            data[key] = { ...record }
+            data[key][fields.CONFIRMED] = parseInt(record[fields.CONFIRMED])
+            data[key][fields.DEATHS] = parseInt(record[fields.DEATHS])
+            data[key][fields.RECOVERED] = parseInt(record[fields.RECOVERED])
+            data[key][fields.NEW_CASES] = data[key][fields.CONFIRMED]
+        }
     }
 
     for (const record of dataBeforeRecent) {
-        const key = record[fields.COUNTRY] + record[fields.STATE]
+        const country = record[fields.COUNTRY] || record[fields2.COUNTRY]
+        const state = record[fields.STATE] || record[fields2.STATE] || ''
+        const key = country + state
         // increase in confirmed cases is new cases
         if (data[key]) {
             let newCases =
