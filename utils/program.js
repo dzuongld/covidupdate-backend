@@ -2,7 +2,6 @@ const https = require('https')
 const parse = require('csv-parse/lib/sync')
 const moment = require('moment')
 const fields = require('./fields')
-const fields2 = require('./fields-alt')
 
 const url =
     'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/'
@@ -16,7 +15,7 @@ const getDate = (prevDate = null) => {
                 .subtract(1, 'days')
                 .format('MM-DD-YYYY')
 
-        const baseDate = '03-13-2020'
+        const baseDate = '03-23-2020'
         if (date === baseDate) {
             console.log('Reached base date')
             resolve(baseDate)
@@ -86,21 +85,15 @@ const processData = async () => {
         // exclude irrelevant records
         if (record[fields.CONFIRMED] == 0) continue
 
-        const country = record[fields.COUNTRY] || record[fields2.COUNTRY]
-        let state = record[fields.STATE] || record[fields2.STATE] || ''
-
-        if (country === 'United Kingdom' && state === '')
-            state = 'United Kingdom'
-
-        if (country === 'Netherlands' && state === '') state = 'Netherlands'
-
+        const country = record[fields.COUNTRY]
+        const state = record[fields.STATE]
         const key = country + state
 
         if (data[key]) {
             data[key][fields.CONFIRMED] += parseInt(record[fields.CONFIRMED])
             data[key][fields.DEATHS] += parseInt(record[fields.DEATHS])
             data[key][fields.RECOVERED] += parseInt(record[fields.RECOVERED])
-            data[key][fields.NEW_CASES] += data[key][fields.CONFIRMED]
+            data[key][fields.NEW_CASES] = data[key][fields.CONFIRMED]
         } else {
             data[key] = { ...record }
             data[key][fields.CONFIRMED] = parseInt(record[fields.CONFIRMED])
@@ -111,18 +104,18 @@ const processData = async () => {
     }
 
     for (const record of dataBeforeRecent) {
-        const country = record[fields.COUNTRY] || record[fields2.COUNTRY]
-        let state = record[fields.STATE] || record[fields2.STATE] || ''
+        const country = record[fields.COUNTRY]
+        const state = record[fields.STATE]
         const key = country + state
         // increase in confirmed cases is new cases
         if (data[key]) {
             let newCases =
-                parseInt(data[key][fields.CONFIRMED]) -
+                parseInt(data[key][fields.NEW_CASES]) -
                 parseInt(record[fields.CONFIRMED])
             if (newCases < 0) newCases = 0 // rare cases - prevent faulty data
             data[key] = {
                 ...data[key],
-                NewCases: newCases.toString()
+                NewCases: newCases
             }
         }
     }

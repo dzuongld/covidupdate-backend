@@ -1,11 +1,12 @@
 module.exports = {
-    COUNTRY: 'Country/Region',
-    STATE: 'Province/State',
-    LAST_UPDATE: 'Last Update',
+    COUNTRY: 'Country_Region',
+    STATE: 'Province_State',
+    LAST_UPDATE: 'Last_Update',
     CONFIRMED: 'Confirmed',
     DEATHS: 'Deaths',
     RECOVERED: 'Recovered',
-    LATITUDE: 'Latitude',
-    LONGITUDE: 'Longitude',
-    NEW_CASES: 'NewCases'
+    LATITUDE: 'Lat',
+    LONGITUDE: 'Long_',
+    NEW_CASES: 'NewCases',
+    COMBINED_KEY: 'Combined_Key'
 }
