@@ -113,10 +113,7 @@ const processData = async () => {
                 parseInt(data[key][fields.NEW_CASES]) -
                 parseInt(record[fields.CONFIRMED])
             if (newCases < 0) newCases = 0 // rare cases - prevent faulty data
-            data[key] = {
-                ...data[key],
-                NewCases: newCases
-            }
+            data[key][fields.NEW_CASES] = newCases
         }
     }
 
