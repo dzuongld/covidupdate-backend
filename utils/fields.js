@@ -8,5 +8,6 @@ module.exports = {
     LATITUDE: 'Lat',
     LONGITUDE: 'Long_',
     NEW_CASES: 'NewCases',
-    COMBINED_KEY: 'Combined_Key'
+    COMBINED_KEY: 'Combined_Key',
+    ACTIVE: 'Active',
 }
