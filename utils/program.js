@@ -132,6 +132,9 @@ const processData = async () => {
 
     // US only
     for (const record of dataRecentUS) {
+        const country = record[fields.COUNTRY]
+        if (country !== 'US') continue
+
         const state = record[fields.STATE]
         const key = 'US' + state
         if (data[key]) {
@@ -139,7 +142,7 @@ const processData = async () => {
             data[key][fields.DEATHS] += parseInt(record[fields.DEATHS])
             data[key][fields.RECOVERED] +=
                 parseInt(record[fields.RECOVERED]) || 0
-            data[key][fields.ACTIVE] = parseInt(record[fields.ACTIVE])
+            data[key][fields.ACTIVE] = parseInt(record[fields.ACTIVE]) || 0
             data[key][fields.NEW_CASES] = data[key][fields.CONFIRMED]
         } else {
             data[key] = { ...record }
@@ -147,7 +150,7 @@ const processData = async () => {
             data[key][fields.DEATHS] = parseInt(record[fields.DEATHS])
             data[key][fields.RECOVERED] =
                 parseInt(record[fields.RECOVERED]) || 0
-            data[key][fields.ACTIVE] = parseInt(record[fields.ACTIVE])
+            data[key][fields.ACTIVE] = parseInt(record[fields.ACTIVE]) || 0
             data[key][fields.NEW_CASES] = data[key][fields.CONFIRMED]
         }
     }
