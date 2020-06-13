@@ -72,6 +72,55 @@ const getData = (date, url) => {
     })
 }
 
+const extractData = (data, dataRecent, dataBeforeRecent, isUS = false) => {
+    for (const record of dataRecent) {
+        // exclude irrelevant records
+        if (record[fields.CONFIRMED] == 0) continue
+
+        const country = record[fields.COUNTRY]
+        const state = record[fields.STATE]
+        const key = country + state
+
+        if ((!isUS && country === 'US') || (isUS && country !== 'US')) continue
+
+        if (data[key]) {
+            data[key][fields.CONFIRMED] +=
+                parseInt(record[fields.CONFIRMED]) || 0
+            data[key][fields.DEATHS] += parseInt(record[fields.DEATHS]) || 0
+            data[key][fields.RECOVERED] +=
+                parseInt(record[fields.RECOVERED]) || 0
+            data[key][fields.ACTIVE] += parseInt(record[fields.ACTIVE]) || 0
+            data[key][fields.NEW_CASES] = data[key][fields.CONFIRMED]
+        } else {
+            data[key] = { ...record }
+            data[key][fields.CONFIRMED] =
+                parseInt(record[fields.CONFIRMED]) || 0
+            data[key][fields.DEATHS] = parseInt(record[fields.DEATHS]) || 0
+            data[key][fields.RECOVERED] =
+                parseInt(record[fields.RECOVERED]) || 0
+            data[key][fields.ACTIVE] = parseInt(record[fields.ACTIVE]) || 0
+            data[key][fields.NEW_CASES] = data[key][fields.CONFIRMED]
+        }
+    }
+
+    for (const record of dataBeforeRecent) {
+        const country = record[fields.COUNTRY]
+        const state = record[fields.STATE]
+        const key = country + state
+
+        if ((!isUS && country === 'US') || (isUS && country !== 'US')) continue
+
+        // increase in confirmed cases is new cases
+        if (data[key]) {
+            let newCases =
+                parseInt(data[key][fields.NEW_CASES]) -
+                parseInt(record[fields.CONFIRMED])
+            if (newCases < 0) newCases = 0 // rare cases - prevent faulty data
+            data[key][fields.NEW_CASES] = newCases
+        }
+    }
+}
+
 const processData = async () => {
     const dateRecent = await getDate()
     const dateBeforeRecent = await getDate(dateRecent)
@@ -87,85 +136,8 @@ const processData = async () => {
     }
 
     const data = {}
-    for (const record of dataRecent) {
-        // exclude irrelevant records
-        if (record[fields.CONFIRMED] == 0) continue
-
-        const country = record[fields.COUNTRY]
-        const state = record[fields.STATE]
-        const key = country + state
-
-        if (country === 'US') continue
-
-        if (data[key]) {
-            data[key][fields.CONFIRMED] += parseInt(record[fields.CONFIRMED])
-            data[key][fields.DEATHS] += parseInt(record[fields.DEATHS])
-            data[key][fields.RECOVERED] += parseInt(record[fields.RECOVERED])
-            data[key][fields.ACTIVE] += parseInt(record[fields.ACTIVE])
-            data[key][fields.NEW_CASES] = data[key][fields.CONFIRMED]
-        } else {
-            data[key] = { ...record }
-            data[key][fields.CONFIRMED] = parseInt(record[fields.CONFIRMED])
-            data[key][fields.DEATHS] = parseInt(record[fields.DEATHS])
-            data[key][fields.RECOVERED] = parseInt(record[fields.RECOVERED])
-            data[key][fields.ACTIVE] = parseInt(record[fields.ACTIVE])
-            data[key][fields.NEW_CASES] = data[key][fields.CONFIRMED]
-        }
-    }
-
-    for (const record of dataBeforeRecent) {
-        const country = record[fields.COUNTRY]
-        const state = record[fields.STATE]
-        const key = country + state
-
-        if (country === 'US') continue
-
-        // increase in confirmed cases is new cases
-        if (data[key]) {
-            let newCases =
-                parseInt(data[key][fields.NEW_CASES]) -
-                parseInt(record[fields.CONFIRMED])
-            if (newCases < 0) newCases = 0 // rare cases - prevent faulty data
-            data[key][fields.NEW_CASES] = newCases
-        }
-    }
-
-    // US only
-    for (const record of dataRecentUS) {
-        const country = record[fields.COUNTRY]
-        if (country !== 'US') continue
-
-        const state = record[fields.STATE]
-        const key = 'US' + state
-        if (data[key]) {
-            data[key][fields.CONFIRMED] += parseInt(record[fields.CONFIRMED])
-            data[key][fields.DEATHS] += parseInt(record[fields.DEATHS])
-            data[key][fields.RECOVERED] +=
-                parseInt(record[fields.RECOVERED]) || 0
-            data[key][fields.ACTIVE] = parseInt(record[fields.ACTIVE]) || 0
-            data[key][fields.NEW_CASES] = data[key][fields.CONFIRMED]
-        } else {
-            data[key] = { ...record }
-            data[key][fields.CONFIRMED] = parseInt(record[fields.CONFIRMED])
-            data[key][fields.DEATHS] = parseInt(record[fields.DEATHS])
-            data[key][fields.RECOVERED] =
-                parseInt(record[fields.RECOVERED]) || 0
-            data[key][fields.ACTIVE] = parseInt(record[fields.ACTIVE]) || 0
-            data[key][fields.NEW_CASES] = data[key][fields.CONFIRMED]
-        }
-    }
-
-    for (const record of dataBeforeRecentUS) {
-        const state = record[fields.STATE]
-        const key = 'US' + state
-        if (data[key]) {
-            let newCases =
-                parseInt(data[key][fields.NEW_CASES]) -
-                parseInt(record[fields.CONFIRMED])
-            if (newCases < 0) newCases = 0
-            data[key][fields.NEW_CASES] = newCases
-        }
-    }
+    extractData(data, dataRecent, dataBeforeRecent) // world
+    extractData(data, dataRecentUS, dataBeforeRecentUS, true) // US
 
     return { covidData: data, date: dateRecent }
 }
