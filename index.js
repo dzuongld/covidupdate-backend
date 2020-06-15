@@ -32,10 +32,10 @@ app.get('/newsfeed', (req, res, next) => {
     })
 })
 
-app.use(express.static(path.join('public')))
+// app.use(express.static(path.join('public')))
 
-app.get('*', (request, response) => {
-    response.sendFile(path.join(__dirname, 'public', 'index.html'))
-})
+// app.get('*', (request, response) => {
+//     response.sendFile(path.join(__dirname, 'public', 'index.html'))
+// })
 
 app.listen(port)
